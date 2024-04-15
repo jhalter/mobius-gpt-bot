@@ -1,0 +1,22 @@
+# This is an example Systemd unit file.
+# Usage:
+# Copy this file to an appropriate location for your system (e.g. /etc/systemd/system/)
+# Start the service:
+#    systemctl start mobius-hotline-bot
+# Enable automatic startup:
+#    systemctl enable mobius-hotline-bot
+[Unit]
+Description=Mobius GPTBot
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+# It's a good idea to set this to a user with limit permissions:
+# User=mobius
+ExecStart=/usr/local/bin/mobius-hotline-bot
+
+[Install]
+WantedBy=multi-user.target
