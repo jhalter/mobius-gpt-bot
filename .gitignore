@@ -17,6 +17,7 @@ coverage.html
 #
 server/config/files/*
 .idea/*
+*.iml
 
 **/.DS_Store
 build
