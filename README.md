@@ -23,8 +23,7 @@ This enables inquries like:
 
 ## ⚠️ Warning  ⚠️
 
-This software depends on the commercial [OpenAI](https://platform.openai.com/overview) Chat GPT-4 APIs and costs money to run and operate. The exact costs vary depending on a number of factors and may be difficult to predict. This software is currently in an experimental phase with limited safeguards against abusive users, so it's important that you set low spending limits on your OpenAI account to prevent billing surprises.
-
+This software depends on the commercial [OpenAI](https://platform.openai.com/overview) Chat GPT-4 APIs and costs money to run and operate. The exact costs vary depending on a number of factors and may be difficult to predict. This software is currently in an experimental phase with limited safeguards against abusive users and rife with bugs and inefficiencies, so it's important that you set low spending limits on your OpenAI account to prevent billing surprises.
 ## Install
 
 ### Build from source
