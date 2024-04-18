@@ -5,15 +5,16 @@ go 1.22
 toolchain go1.22.1
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/jhalter/mobius v0.12.1
 	github.com/sashabaranov/go-openai v1.21.0
 	golang.org/x/time v0.5.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 //replace github.com/jhalter/mobius => /Users/jhalter/repos/mobius
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell/v2 v2.7.4 // indirect
@@ -35,6 +36,5 @@ require (
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 
 )

@@ -33,7 +33,7 @@ func (b *Bot) HandleNotifyDeleteUser(ctx context.Context, c *hotline.Client, t *
 	return res, err
 }
 
-func (b *Bot) HandleClientGetUserNameList(ctx context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
+func (b *Bot) HandleClientGetUserNameList(_ context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	var users []hotline.User
 	for _, field := range t.Fields {
 		// The Hotline protocol docs say that ClientGetUserNameList should only return fieldUsernameWithInfo (300)
@@ -56,7 +56,8 @@ func (b *Bot) HandleKeepAlive(_ context.Context, _ *hotline.Client, _ *hotline.T
 	return []hotline.Transaction{}, nil
 }
 
-func (b *Bot) HandleInviteToChat(ctx context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
+// HandleInviteToChat responds to private chat invitations by accepting the invite.
+func (b *Bot) HandleInviteToChat(_ context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	res = append(
 		res,
 		*hotline.NewTransaction(
@@ -69,7 +70,8 @@ func (b *Bot) HandleInviteToChat(ctx context.Context, c *hotline.Client, t *hotl
 	return res, err
 }
 
-func (b *Bot) HandleServerMsg(ctx context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
+// HandleServerMsg reponds to direct messages from users.
+func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	msg := strings.ReplaceAll(string(t.GetField(hotline.FieldData).Data), "\r", "\n")
 	hlUser := string(t.GetField(hotline.FieldUserName).Data)
 
@@ -122,6 +124,7 @@ func (b *Bot) HandleServerMsg(ctx context.Context, c *hotline.Client, t *hotline
 	return res, err
 }
 
+// chatMsgRegex matches public chat messages that are addressed to the bot user.
 const chatMsgRegex = "(?P<User>\\w*):  (?P<Msg>.*)"
 
 func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
@@ -139,7 +142,7 @@ func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hot
 	}
 
 	// If message came from the bot, ignore it to avoid an infinite self-reply loop
-	if user == b.Username {
+	if user == b.Config.Name {
 		return res, nil
 	}
 
@@ -151,7 +154,7 @@ func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hot
 		})
 
 		// If the incoming message is in public chat, check if it is addressed to the bot user
-		br := regexp.MustCompile(fmt.Sprintf(`(?i):\s+%s[:,\s]+(.*$)`, b.Username))
+		br := regexp.MustCompile(fmt.Sprintf(`(?i):\s+%s[:,\s]+(.*$)`, b.Config.Name))
 		if !br.Match(t.GetField(hotline.FieldData).Data) {
 			return res, nil
 		}
@@ -233,7 +236,7 @@ func (b *Bot) TranGetClientInfoText(ctx context.Context, c *hotline.Client, t *h
 	matches := r.FindStringSubmatch(string(t.GetField(hotline.FieldData).Data))
 
 	if len(matches) != 3 {
-		return res, errors.New("invalid client info received")
+		return res, errors.New("unable to get user info: possibly missing Can Get User Info permission.  user greeting disabled.")
 	}
 
 	account := matches[1]
@@ -315,6 +318,8 @@ func (b *Bot) TranNotifyChangeUser(_ context.Context, _ *hotline.Client, t *hotl
 		return res, nil
 	}
 
+	// Check to see if this is transaction was triggered by a new visitor to the server, or a status change to an
+	// existing user.  In the latter case we don't need to do anything.
 	for i := 0; i < len(b.HotlineClient.UserList); i++ {
 		if bytes.Equal(newUser.ID, b.HotlineClient.UserList[i].ID) {
 			return res, nil
@@ -323,11 +328,14 @@ func (b *Bot) TranNotifyChangeUser(_ context.Context, _ *hotline.Client, t *hotl
 
 	b.HotlineClient.UserList = append(b.HotlineClient.UserList, newUser)
 
-	res = append(res,
-		*hotline.NewTransaction(hotline.TranGetClientInfoText, nil,
-			hotline.NewField(hotline.FieldUserID, t.GetField(hotline.FieldUserID).Data),
-		),
-	)
-
+	// If we're configured to greet users, send a request to get user info so that we can check the user IP address for
+	// rate limiting purposes.
+	if b.Config.GreetUsers {
+		res = append(res,
+			*hotline.NewTransaction(hotline.TranGetClientInfoText, nil,
+				hotline.NewField(hotline.FieldUserID, t.GetField(hotline.FieldUserID).Data),
+			),
+		)
+	}
 	return res, err
 }

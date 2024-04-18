@@ -21,6 +21,8 @@ func (b *Bot) RunLoop(ctx context.Context, threadID string) (r openai.Run, err e
 		return r, err
 	}
 
+	b.HotlineClient.Logger.Info("CreateRun", "runID", run.ID, "threadID", run.ThreadID, "status", run.Status)
+
 	var newRun openai.Run
 	for {
 		newRun, err = b.OpenAPIClient.RetrieveRun(ctx, run.ThreadID, run.ID)
@@ -51,8 +53,6 @@ func (b *Bot) RunLoop(ctx context.Context, threadID string) (r openai.Run, err e
 				return r, err
 			}
 		}
-
-		b.HotlineClient.Logger.Info("RetrieveRun", "runID", run.ID, "threadID", run.ThreadID, "status", newRun.Status)
 
 		time.Sleep(runSleepInterval)
 	}

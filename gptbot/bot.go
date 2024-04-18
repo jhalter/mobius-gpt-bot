@@ -23,8 +23,7 @@ type Bot struct {
 	Threads       map[int]openai.Thread    // Hotline chat ID -> OpenAI Thread
 	PMThreads     map[uint16]openai.Thread // Hotline user ID -> OpenAI Thread
 
-	Config   Config
-	Username string
+	Config Config
 
 	lastInteraction    time.Time
 	lastInteractionMUX sync.Mutex
@@ -114,7 +113,7 @@ func New(ctx context.Context, config Config, oc *openai.Client, logger *slog.Log
 		Users:            make(map[string]user),
 		PMThreads:        make(map[uint16]openai.Thread),
 		OpenAPIClient:    oc,
-		Username:         config.Name,
+		Config:           config,
 		HotlineClient:    hotline.NewClient(config.Name, logger),
 		toolCallHandlers: make(map[string]toolCallHandleFunc),
 		lastInteraction:  time.Now(),

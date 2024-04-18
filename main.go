@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jhalter/mobius/hotline"
 	"github.com/sashabaranov/go-openai"
 	"gopkg.in/yaml.v3"
@@ -14,7 +13,7 @@ import (
 )
 
 func main() {
-	srvAddr := flag.String("server-address", "localhost:5600", "Hotline server hostname:port")
+	srvAddr := flag.String("server", "localhost:5600", "Hotline server hostname:port")
 	login := flag.String("login", "guest", "Hotline server login")
 	pass := flag.String("pass", "", "Hotline server password")
 	logLevel := flag.String("log-level", "info", "Log level")
@@ -47,7 +46,6 @@ func main() {
 
 	var botConfig gptbot.Config
 	if *config != "" {
-		spew.Dump("hai")
 		fh, err := os.Open(*config)
 		if err != nil {
 			panic(err)
@@ -58,11 +56,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		spew.Dump(botConfig)
 	} else {
 		botConfig = gptbot.DefaultConfig
 	}
-	spew.Dump(config, botConfig)
 
 	bot, err := gptbot.New(
 		ctx,
@@ -110,7 +106,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Get initial news posts.
+	// Get initial news posts so that we can answer questions related to news postings.
 	if err = bot.HotlineClient.Send(*hotline.NewTransaction(hotline.TranGetMsgs, nil)); err != nil {
 		logger.Error("Hotline connection error", "error", err)
 		os.Exit(1)

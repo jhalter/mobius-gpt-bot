@@ -9,9 +9,9 @@ type user struct {
 	greetingLimiter *rate.Limiter
 }
 
-const perIPRateLimit = rate.Limit(0.0005) // ~ 2 greets per hour
+// const perIPRateLimit = rate.Limit(0.0005) // ~ 2 greets per hour
+const perIPRateLimit = rate.Limit(0.1005) // ~ 2 greets per hour
 
-// 3600 / 3600
 func NewUser(account string) user {
 	return user{
 		account:         account,
