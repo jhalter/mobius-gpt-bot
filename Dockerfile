@@ -18,6 +18,7 @@ RUN apt-get update \
 RUN update-ca-certificates
 
 COPY --from=builder /app/mobius-hotline-bot /app/mobius-hotline-bot
+
 RUN useradd -d /app -u ${UID} ${USERNAME}
 RUN chown -R ${USERNAME}:${USERNAME} /app
 

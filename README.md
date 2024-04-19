@@ -24,32 +24,36 @@ This enables interactions like:
 ## ⚠️ Warning  ⚠️
 
 This software depends on the commercial [OpenAI](https://platform.openai.com/overview) ChatGPT-4 APIs and costs money to run and operate. The exact costs vary depending on a number of factors and may be difficult to predict. This software is currently in an experimental phase with limited safeguards against abusive users and rife with bugs and inefficiencies, so it's important that you set low spending limits on your OpenAI account to prevent billing surprises.
-## Install
-
-### Build from source
-
-TODO
-
-### Download compiled release
-
-TODO
-
-### Docker
-
-Run the latest release from the [releases](https://github.com/jhalter/mobius-gpt-bot/pkgs/container/hotline-ai-chat-bot) page.
-
-TODO
 
 ## Setup
 
 1. Create a new OpenAI [Project API key](https://platform.openai.com/api-keys) and set it as the `OPENAI_API_KEY` environment variable.
 2. (Optional) If you'd like to enable visitor greetings, create a new Hotline user account with the following permissions:
-    * Send Message
-    * Private Chat
-    * Public Chat
-    * Can Get User Info
+   * Send Message
+   * Private Chat
+   * Public Chat
+   * Can Get User Info
 3. (Optional) If you'd like to customize the name, icon, identity, greeting, etc, copy `example-config.yaml` from this repo and edit to your preference.
-4. Run it: `./mobius-gpt-bot -server=192.168.86.29:5500 -config ./config.yaml -login bot -pass bot`
+4. Acquire the binary through your preferred method:
+   * Build it with `go build .`
+   * Download a pre-compiled binary from the releases page 
+   * Run the Docker image
+5. Run it:
+* From binary:
+
+`./mobius-gpt-bot -server=your-server:5500 -login botuser -pass botpass`
+
+* From Docker image:
+```
+export OPENAI_API_KEY=<your OPENAI_API_KEY>
+docker run --pull=always --rm -e OPENAI_API_KEY=$OPENAI_API_KEY ghcr.io/jhalter/mobius-gpt-bot:latest -server=your-server:5500 -login botuser -pass botpass
+```
+
+To run the Docker image with a custom config file, use a bind mount to point to a directory on the host system that has the config.yaml:
+
+```
+docker run --pull=always --rm -e OPENAI_API_KEY=$OPENAI_API_KEY -v /home/jhalter/bot-config-dir:/usr/local/etc ghcr.io/jhalter/mobius-gpt-bot:latest -server=your-server:5500 -login botuser -pass botpass -config /usr/local/etc/config.yaml
+```
 
 ## License
 
