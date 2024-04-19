@@ -70,7 +70,7 @@ func (b *Bot) HandleInviteToChat(_ context.Context, _ *hotline.Client, t *hotlin
 	return res, err
 }
 
-// HandleServerMsg reponds to direct messages from users.
+// HandleServerMsg responds to direct messages from users.
 func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	msg := strings.ReplaceAll(string(t.GetField(hotline.FieldData).Data), "\r", "\n")
 	hlUser := string(t.GetField(hotline.FieldUserName).Data)
