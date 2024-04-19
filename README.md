@@ -1,10 +1,10 @@
-# Durandal
+# Mobius-GPT-bot
 
-Durandal is an experimental, cross-platform [Hotline](https://en.wikipedia.org/wiki/Hotline_Communications) chat bot powered by the OpenAI ChatGPT-4 [assistants](https://platform.openai.com/docs/api-reference/assistants) API.
+Mobius-GPT-bot is an experimental, cross-platform [Hotline](https://en.wikipedia.org/wiki/Hotline_Communications) chat bot powered by the OpenAI ChatGPT-4 [assistants](https://platform.openai.com/docs/api-reference/assistants) API.
 
 ## Features
 
-Durandal can greet visitors to a Hotline server and respond to user interactions with OpenAI ChatGPT-4 generated responses.
+Mobius-GPT-bot can greet visitors to a Hotline server and respond to user interactions with OpenAI ChatGPT-4 generated responses.
 
 Users can interact with the bot by:
 
@@ -14,7 +14,7 @@ Users can interact with the bot by:
 
 The bot can make calls to external sources as part of the response generation.  This currently includes accessing the Hotline server news, public chat history, and visitor history.
 
-This enables inquries like:
+This enables interactions like:
 
 * _Summarize the recent chat history_
 * _Translate the last news post to Spanish_
@@ -23,7 +23,7 @@ This enables inquries like:
 
 ## ⚠️ Warning  ⚠️
 
-This software depends on the commercial [OpenAI](https://platform.openai.com/overview) Chat GPT-4 APIs and costs money to run and operate. The exact costs vary depending on a number of factors and may be difficult to predict. This software is currently in an experimental phase with limited safeguards against abusive users and rife with bugs and inefficiencies, so it's important that you set low spending limits on your OpenAI account to prevent billing surprises.
+This software depends on the commercial [OpenAI](https://platform.openai.com/overview) ChatGPT-4 APIs and costs money to run and operate. The exact costs vary depending on a number of factors and may be difficult to predict. This software is currently in an experimental phase with limited safeguards against abusive users and rife with bugs and inefficiencies, so it's important that you set low spending limits on your OpenAI account to prevent billing surprises.
 ## Install
 
 ### Build from source
@@ -49,7 +49,7 @@ TODO
     * Public Chat
     * Can Get User Info
 3. (Optional) If you'd like to customize the name, icon, identity, greeting, etc, copy `example-config.yaml` from this repo and edit to your preference.
-4. Run it: `./hl-bot -server=192.168.86.29:5600 -config ./config.yaml -login bot -pass bot`
+4. Run it: `./mobius-gpt-bot -server=192.168.86.29:5500 -config ./config.yaml -login bot -pass bot`
 
 ## License
 
