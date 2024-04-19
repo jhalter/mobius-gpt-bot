@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Printf("v%s\n", gptbot.VERSION)
+		fmt.Printf("v%s\n", "TODO: Embed version during build")
 		os.Exit(0)
 	}
 
