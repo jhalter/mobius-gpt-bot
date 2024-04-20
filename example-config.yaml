@@ -2,6 +2,7 @@
 Name: Durandal
 
 # Hotline icon ID for the bot user
+# See: https://wiki.preterhuman.net/Hotline_Icons
 IconID: 4121
 
 # Set to true to have the bot greet visitors to the server in public chat
