@@ -60,10 +60,13 @@ func main() {
 		botConfig = gptbot.DefaultConfig
 	}
 
+	openAIConfig := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
+	openAIConfig.AssistantVersion = "v2"
+
 	bot, err := gptbot.New(
 		ctx,
 		botConfig,
-		openai.NewClient(os.Getenv("OPENAI_API_KEY")),
+		openai.NewClientWithConfig(openAIConfig),
 		logger,
 	)
 	if err != nil {

@@ -10,7 +10,7 @@ type funcProps struct {
 }
 
 var defaultAssistant = openai.AssistantRequest{
-	Model:       openai.GPT4TurboPreview,
+	Model:       openai.GPT4o,
 	Description: nil,
 	Tools: []openai.AssistantTool{
 		{
