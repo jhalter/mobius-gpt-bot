@@ -39,10 +39,6 @@ func main() {
 	)
 
 	ctx := context.Background()
-	// TODO: Implement context cancellation.
-	// trap Ctrl+C and cancel the context
-	//ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, os.Interrupt)
-	//defer cancel()
 
 	var botConfig gptbot.Config
 	if *config != "" {
@@ -104,13 +100,13 @@ func main() {
 	}
 
 	// Get the initial username list.
-	if err = bot.HotlineClient.Send(*hotline.NewTransaction(hotline.TranGetUserNameList, nil)); err != nil {
+	if err = bot.HotlineClient.Send(hotline.NewTransaction(hotline.TranGetUserNameList, [2]byte{})); err != nil {
 		logger.Error("Hotline connection error", "error", err)
 		os.Exit(1)
 	}
 
 	// Get initial news posts so that we can answer questions related to news postings.
-	if err = bot.HotlineClient.Send(*hotline.NewTransaction(hotline.TranGetMsgs, nil)); err != nil {
+	if err = bot.HotlineClient.Send(hotline.NewTransaction(hotline.TranGetMsgs, [2]byte{})); err != nil {
 		logger.Error("Hotline connection error", "error", err)
 		os.Exit(1)
 	}

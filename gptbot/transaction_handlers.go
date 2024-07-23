@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/jhalter/mobius/hotline"
 	"github.com/sashabaranov/go-openai"
+	"io"
 	"regexp"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ func (b *Bot) HandleNotifyDeleteUser(ctx context.Context, c *hotline.Client, t *
 
 	var newUserList []hotline.User
 	for _, u := range c.UserList {
-		if !bytes.Equal(exitUser, u.ID) {
+		if !bytes.Equal(exitUser, u.ID[:]) {
 			newUserList = append(newUserList, u)
 		}
 	}
@@ -39,12 +40,14 @@ func (b *Bot) HandleClientGetUserNameList(_ context.Context, c *hotline.Client, 
 		// The Hotline protocol docs say that ClientGetUserNameList should only return fieldUsernameWithInfo (300)
 		// fields, but shxd sneaks in fieldChatSubject (115) so it's important to filter explicitly for the expected
 		// field type.  Probably a good idea to do everywhere.
-		if bytes.Equal(field.ID, []byte{0x01, 0x2c}) {
-			u, err := hotline.ReadUser(field.Data)
+		if field.Type == hotline.FieldChatSubject {
+			var u hotline.User
+			_, err := io.Copy(&u, bytes.NewReader(field.Data))
 			if err != nil {
 				return res, err
 			}
-			users = append(users, *u)
+
+			users = append(users, u)
 		}
 	}
 	c.UserList = users
@@ -60,9 +63,9 @@ func (b *Bot) HandleKeepAlive(_ context.Context, _ *hotline.Client, _ *hotline.T
 func (b *Bot) HandleInviteToChat(_ context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	res = append(
 		res,
-		*hotline.NewTransaction(
+		hotline.NewTransaction(
 			hotline.TranJoinChat,
-			nil,
+			[2]byte{},
 			hotline.NewField(hotline.FieldChatID, t.GetField(hotline.FieldChatID).Data),
 		),
 	)
@@ -110,15 +113,14 @@ func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline
 
 	replyMsg := strings.ReplaceAll(updatedThread.Messages[0].Content[0].Text.Value, "\n", "\r")
 
-	reply := hotline.NewTransaction(
-		hotline.TranSendInstantMsg,
-		nil,
-		hotline.NewField(hotline.FieldData, []byte(replyMsg)),
-		hotline.NewField(hotline.FieldUserID, t.GetField(hotline.FieldUserID).Data),
-	)
 	res = append(
 		res,
-		*reply,
+		hotline.NewTransaction(
+			hotline.TranSendInstantMsg,
+			[2]byte{},
+			hotline.NewField(hotline.FieldData, []byte(replyMsg)),
+			hotline.NewField(hotline.FieldUserID, t.GetField(hotline.FieldUserID).Data),
+		),
 	)
 
 	return res, err
@@ -216,7 +218,7 @@ func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hot
 	}
 
 	res = append(res,
-		*hotline.NewTransaction(hotline.TranChatSend, nil,
+		hotline.NewTransaction(hotline.TranChatSend, [2]byte{},
 			fields...,
 		),
 	)
@@ -289,7 +291,7 @@ func (b *Bot) TranGetClientInfoText(ctx context.Context, c *hotline.Client, t *h
 	c.Logger.Info("Sent new user greeting", "content", updatedThread.Messages[0].Content[0].Text.Value)
 
 	res = append(res,
-		*hotline.NewTransaction(hotline.TranChatSend, nil,
+		hotline.NewTransaction(hotline.TranChatSend, [2]byte{},
 			hotline.NewField(hotline.FieldData, []byte(strings.ReplaceAll(updatedThread.Messages[0].Content[0].Text.Value, "\n", "\r"))),
 		),
 	)
@@ -308,7 +310,7 @@ func (b *Bot) TranGetMsgs(ctx context.Context, c *hotline.Client, t *hotline.Tra
 
 func (b *Bot) TranNotifyChangeUser(_ context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	newUser := hotline.User{
-		ID:    t.GetField(hotline.FieldUserID).Data,
+		ID:    [2]byte(t.GetField(hotline.FieldUserID).Data),
 		Name:  string(t.GetField(hotline.FieldUserName).Data),
 		Icon:  t.GetField(hotline.FieldUserIconID).Data,
 		Flags: t.GetField(hotline.FieldUserFlags).Data,
@@ -321,7 +323,7 @@ func (b *Bot) TranNotifyChangeUser(_ context.Context, _ *hotline.Client, t *hotl
 	// Check to see if this is transaction was triggered by a new visitor to the server, or a status change to an
 	// existing user.  In the latter case we don't need to do anything.
 	for i := 0; i < len(b.HotlineClient.UserList); i++ {
-		if bytes.Equal(newUser.ID, b.HotlineClient.UserList[i].ID) {
+		if newUser.ID == b.HotlineClient.UserList[i].ID {
 			return res, nil
 		}
 	}
@@ -332,7 +334,7 @@ func (b *Bot) TranNotifyChangeUser(_ context.Context, _ *hotline.Client, t *hotl
 	// rate limiting purposes.
 	if b.Config.GreetUsers {
 		res = append(res,
-			*hotline.NewTransaction(hotline.TranGetClientInfoText, nil,
+			hotline.NewTransaction(hotline.TranGetClientInfoText, [2]byte{},
 				hotline.NewField(hotline.FieldUserID, t.GetField(hotline.FieldUserID).Data),
 			),
 		)
