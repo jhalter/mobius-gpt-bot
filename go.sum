@@ -1,5 +1,7 @@
 github.com/Netflix/go-env v0.0.1 h1:8qIjVK5eR54CmAvRiS4VXy/tkhi/KeOKjpAHO0990oM=
 github.com/Netflix/go-env v0.0.1/go.mod h1:XTo6a/MzolfKW0be/DjOtzUpNvmmc72g2I7dso3OjUk=
+github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d h1:S2NE3iHSwP0XV47EEXL8mWmRdEfGscSJ+7EgePNgt0s=
+github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d/go.mod h1:sGbDF6GwGcLpkNXPUTkMRoywsNa/ol15pxFe6ERfguA=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/jhalter/mobius v0.17.0 h1:yVsGbfXcIINfrk5D5wlnsOsLW0fF/z81areueTv4d44=

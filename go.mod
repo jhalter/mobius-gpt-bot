@@ -4,7 +4,7 @@ go 1.22.5
 
 require (
 	github.com/Netflix/go-env v0.0.1
-	github.com/davecgh/go-spew v1.1.1
+	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d
 	github.com/jhalter/mobius v0.17.0
 	github.com/sashabaranov/go-openai v1.28.1
 	golang.org/x/time v0.6.0
@@ -14,6 +14,7 @@ require (
 //replace github.com/jhalter/mobius => /Users/jhalter/repos/mobius
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
