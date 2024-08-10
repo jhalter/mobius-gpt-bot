@@ -84,7 +84,7 @@ func main() {
 	bot, err := gptbot.New(
 		ctx,
 		environment.BotConfig,
-		openai.NewClientWithConfig(openai.DefaultConfig(environment.APIKey)),
+		openai.NewClientWithConfig(openaiConfig),
 		logger,
 	)
 	if err != nil {
