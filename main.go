@@ -2,18 +2,15 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"github.com/Netflix/go-env"
-	"github.com/certifi/gocertifi"
 	"github.com/jhalter/mobius/hotline"
 	"github.com/sashabaranov/go-openai"
 	"gopkg.in/yaml.v3"
 	"hotline-chat-gpt-bot/gptbot"
 	"log"
 	"log/slog"
-	"net/http"
 	"os"
 )
 
@@ -71,20 +68,10 @@ func main() {
 		}
 	}
 
-	certPool, err := gocertifi.CACerts()
-	if err != nil {
-		panic(err)
-	}
-
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{RootCAs: certPool}
-	openaiConfig := openai.DefaultConfig(environment.APIKey)
-	openaiConfig.HTTPClient = &http.Client{Transport: transport}
-
 	bot, err := gptbot.New(
 		ctx,
 		environment.BotConfig,
-		openai.NewClientWithConfig(openaiConfig),
+		openai.NewClientWithConfig(openai.DefaultConfig(environment.APIKey)),
 		logger,
 	)
 	if err != nil {
