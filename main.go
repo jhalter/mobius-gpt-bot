@@ -4,12 +4,26 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/Netflix/go-env"
 	"github.com/jhalter/mobius/hotline"
 	"github.com/sashabaranov/go-openai"
 	"gopkg.in/yaml.v3"
 	"hotline-chat-gpt-bot/gptbot"
+	"log"
 	"log/slog"
 	"os"
+)
+
+type Environment struct {
+	APIKey string `env:"OPENAI_API_KEY,required=true"`
+
+	BotConfig gptbot.Config
+}
+
+// Values swapped in by go-releaser at build time
+var (
+	version = "dev"
+	commit  = "none"
 )
 
 func main() {
@@ -18,17 +32,12 @@ func main() {
 	pass := flag.String("pass", "", "Hotline server password")
 	logLevel := flag.String("log-level", "info", "Log level")
 	config := flag.String("config", "", "Path to config file")
-	version := flag.Bool("version", false, "Print version and exit")
+	printVersion := flag.Bool("version", false, "Print version and exit")
 	flag.Parse()
 
-	if *version {
-		fmt.Printf("v%s\n", "TODO: Embed version during build")
+	if *printVersion {
+		fmt.Printf("version %s, commit %s\n", version, commit)
 		os.Exit(0)
-	}
-
-	if os.Getenv("OPENAI_API_KEY") == "" {
-		fmt.Println("Missing OPENAI_API_KEY environment variable.")
-		os.Exit(1)
 	}
 
 	logger := slog.New(
@@ -40,7 +49,12 @@ func main() {
 
 	ctx := context.Background()
 
-	var botConfig gptbot.Config
+	var environment Environment
+	_, err := env.UnmarshalFromEnviron(&environment)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if *config != "" {
 		fh, err := os.Open(*config)
 		if err != nil {
@@ -48,21 +62,16 @@ func main() {
 		}
 
 		decoder := yaml.NewDecoder(fh)
-		err = decoder.Decode(&botConfig)
+		err = decoder.Decode(&environment.BotConfig)
 		if err != nil {
 			panic(err)
 		}
-	} else {
-		botConfig = gptbot.DefaultConfig
 	}
-
-	openAIConfig := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
-	openAIConfig.AssistantVersion = "v2"
 
 	bot, err := gptbot.New(
 		ctx,
-		botConfig,
-		openai.NewClientWithConfig(openAIConfig),
+		environment.BotConfig,
+		openai.NewClientWithConfig(openai.DefaultConfig(environment.APIKey)),
 		logger,
 	)
 	if err != nil {
@@ -70,7 +79,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	bot.HotlineClient.Pref.IconID = botConfig.IconID
+	bot.HotlineClient.Pref.IconID = environment.BotConfig.IconID
 
 	// Register transaction handlers for transaction types that we should act on.
 	bot.HotlineClient.HandleFunc(hotline.TranChatMsg, bot.HandleClientChatMsg)
@@ -90,7 +99,7 @@ func main() {
 	bot.HandleToolCallFunc("get_release_info", bot.GetReleaseInfo)
 	bot.HandleToolCallFunc("get_hotline_release_info", bot.GetHotlineReleaseInfo)
 
-	logger.InfoContext(ctx, "Started Mobius GPT Bot")
+	logger.InfoContext(ctx, "Started Mobius GPT Bot", "version", version, "model", environment.BotConfig.Model)
 
 	// Connect to the Hotline server.
 	err = bot.HotlineClient.Connect(*srvAddr, *login, *pass)

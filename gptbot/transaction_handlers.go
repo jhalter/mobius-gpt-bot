@@ -60,7 +60,9 @@ func (b *Bot) HandleKeepAlive(_ context.Context, _ *hotline.Client, _ *hotline.T
 }
 
 // HandleInviteToChat responds to private chat invitations by accepting the invite.
-func (b *Bot) HandleInviteToChat(_ context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
+func (b *Bot) HandleInviteToChat(ctx context.Context, _ *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
+	b.HotlineClient.Logger.InfoContext(ctx, "Received private chat invite", "hlUser", string(t.GetField(hotline.FieldUserName).Data))
+
 	res = append(
 		res,
 		hotline.NewTransaction(
@@ -83,7 +85,7 @@ func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline
 	}
 	userID := binary.BigEndian.Uint16(t.GetField(hotline.FieldUserID).Data)
 
-	b.HotlineClient.Logger.InfoContext(ctx, "Received private message", "msg", msg, "hlUser", hlUser)
+	b.HotlineClient.Logger.InfoContext(ctx, "Received private message", "hlUser", hlUser)
 
 	if _, ok := b.PMThreads[userID]; !ok {
 		pubChatThread, err := b.OpenAPIClient.CreateThread(ctx, openai.ThreadRequest{})
@@ -127,7 +129,7 @@ func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline
 }
 
 // chatMsgRegex matches public chat messages that are addressed to the bot user.
-const chatMsgRegex = "(?P<User>\\w*):  (?P<Msg>.*)"
+const chatMsgRegex = "([a-zA-Z()].*):  (.*)"
 
 func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hotline.Transaction) (res []hotline.Transaction, err error) {
 	r := regexp.MustCompile(chatMsgRegex)

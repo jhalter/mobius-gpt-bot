@@ -81,6 +81,7 @@ func New(ctx context.Context, config Config, oc *openai.Client, logger *slog.Log
 
 	assistant := defaultAssistant
 	assistant.Name = &assistantName
+	assistant.Model = config.Model
 
 	create := func(name, t string) *template.Template {
 		return template.Must(template.New(name).Parse(t))
