@@ -2,72 +2,51 @@ package main
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"github.com/Netflix/go-env"
 	"github.com/jhalter/mobius/hotline"
 	"github.com/sashabaranov/go-openai"
-	"gopkg.in/yaml.v3"
 	"hotline-chat-gpt-bot/gptbot"
 	"log"
 	"log/slog"
 	"os"
+	"time"
 )
 
 type Environment struct {
-	APIKey string `env:"OPENAI_API_KEY,required=true"`
+	APIKey     string `env:"OPENAI_API_KEY,required=true"`
+	ServerAddr string `env:"SERVER_ADDR"`
+	Login      string `env:"SERVER_LOGIN,default=guest"`
+	Password   string `env:"SERVER_PASS"`
 
 	BotConfig gptbot.Config
 }
 
-// Values swapped in by go-releaser at build time
-var (
-	version = "dev"
-	commit  = "none"
-)
+// Value swapped in by go-releaser at build time
+var version = "dev"
 
 func main() {
-	srvAddr := flag.String("server", "localhost:5600", "Hotline server hostname:port")
-	login := flag.String("login", "guest", "Hotline server login")
-	pass := flag.String("pass", "", "Hotline server password")
-	logLevel := flag.String("log-level", "info", "Log level")
-	config := flag.String("config", "", "Path to config file")
-	printVersion := flag.Bool("version", false, "Print version and exit")
-	flag.Parse()
-
-	if *printVersion {
-		fmt.Printf("version %s, commit %s\n", version, commit)
-		os.Exit(0)
-	}
-
-	logger := slog.New(
-		slog.NewTextHandler(
-			os.Stdout,
-			&slog.HandlerOptions{Level: logLevels[*logLevel]},
-		),
-	)
-
-	ctx := context.Background()
-
 	var environment Environment
 	_, err := env.UnmarshalFromEnviron(&environment)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if *config != "" {
-		fh, err := os.Open(*config)
-		if err != nil {
-			panic(err)
-		}
+	logger := slog.New(
+		slog.NewTextHandler(
+			os.Stdout,
+			&slog.HandlerOptions{
+				ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+					if a.Key == slog.TimeKey {
+						// Remove the milliseconds from the time field to save a few columns.
+						a.Value = slog.StringValue(a.Value.Time().Format(time.RFC3339))
+					}
+					return a
+				},
+			},
+		),
+	)
 
-		decoder := yaml.NewDecoder(fh)
-		err = decoder.Decode(&environment.BotConfig)
-		if err != nil {
-			panic(err)
-		}
-	}
-
+	ctx := context.Background()
 	bot, err := gptbot.New(
 		ctx,
 		environment.BotConfig,
@@ -102,7 +81,7 @@ func main() {
 	logger.InfoContext(ctx, "Started Mobius GPT Bot", "version", version, "model", environment.BotConfig.Model)
 
 	// Connect to the Hotline server.
-	err = bot.HotlineClient.Connect(*srvAddr, *login, *pass)
+	err = bot.HotlineClient.Connect(environment.ServerAddr, environment.Login, environment.Password)
 	if err != nil {
 		logger.Error("Hotline connection error", "error", err)
 		os.Exit(1)
@@ -125,10 +104,4 @@ func main() {
 		logger.Error("Hotline connection error", "error", err)
 		os.Exit(1)
 	}
-}
-
-var logLevels = map[string]slog.Level{
-	"debug": slog.LevelDebug,
-	"info":  slog.LevelInfo,
-	"error": slog.LevelError,
 }
