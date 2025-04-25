@@ -5,6 +5,6 @@ type Config struct {
 	IconID       int    `env:"BOT_ICON,default=4121"`
 	GreetUsers   bool   `env:"BOT_GREET_USERS,default=false"`
 	Greeting     string `env:"BOT_GREETING"`
-	Instructions string `env:"BOT_INSTRUCTIONS"`
+	Instructions string `env:"BOT_INSTRUCTIONS",default=""`
 	Model        string `env:"OPENAI_MODEL,default=gpt-4o-mini"`
 }

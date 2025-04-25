@@ -108,7 +108,7 @@ func (b *Bot) HandleServerMsg(ctx context.Context, _ *hotline.Client, t *hotline
 		return res, err
 	}
 
-	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, nil, nil, nil, nil)
+	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, nil, nil, nil, nil, &run.ID)
 	if err != nil {
 		return res, err
 	}
@@ -204,7 +204,7 @@ func (b *Bot) HandleClientChatMsg(ctx context.Context, c *hotline.Client, t *hot
 	}
 
 	limit := 1
-	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, &limit, nil, nil, nil)
+	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, &limit, nil, nil, nil, &run.ID)
 	if err != nil {
 		return res, fmt.Errorf("openAI listMessage error: %w", err)
 	}
@@ -278,7 +278,7 @@ func (b *Bot) TranGetClientInfoText(ctx context.Context, c *hotline.Client, t *h
 		return res, err
 	}
 
-	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, nil, nil, nil, nil)
+	updatedThread, err := b.OpenAPIClient.ListMessage(ctx, run.ThreadID, nil, nil, nil, nil, &run.ID)
 	if err != nil {
 		return res, err
 	}
